@@ -1,5 +1,6 @@
 module DeepForest
 
-# Write your package code here.
+include("forest.jl")
+include("tree.jl")
 
 end
