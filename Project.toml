@@ -1,4 +1,13 @@
-[deps]
-Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
-Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-ShapML = "8523bd24-6f66-414b-9e1e-b02db3916d64"
+name = "DeepForest"
+uuid = "caac18e2-70b9-41b7-b707-5295ac4b8fcd"
+authors = ["Shalin Patel <shalin.kp.patel@gmail.com> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
