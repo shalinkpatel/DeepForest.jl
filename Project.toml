@@ -9,6 +9,7 @@ Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 ShapML = "8523bd24-6f66-414b-9e1e-b02db3916d64"
 
 [compat]
+ShapML = "0.3"
 julia = "1"
 
 [extras]
