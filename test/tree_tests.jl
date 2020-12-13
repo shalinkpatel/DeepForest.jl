@@ -4,12 +4,12 @@ using Test
 @testset "Leaf precompute" begin
     l = DeepForest.Leaf()
     x = [1.0 2.0; 3.0 4.0]
-    y = [0, 0]
-    DeepForest.precompute!(l, x, y)
-    @test l.pred == 0
     y = [1, 1]
     DeepForest.precompute!(l, x, y)
     @test l.pred == 1
+    y = [2, 2]
+    DeepForest.precompute!(l, x, y)
+    @test l.pred == 2
 end
 
 @testset "Leaf predict" begin
@@ -49,4 +49,18 @@ end
 
     n = Node(feat_sub, 5, 2, 1)
     @test DeepForest.tree_params(n) != Flux.Params([])
+end
+
+@testset "Node precompute" begin
+    feat_sub = Dict(
+        1 => [1, 2],
+        2 => [2, 3],
+        3 => [1, 3]
+    )
+
+    n = Node(feat_sub, 5, 2, 1)
+    x = rand(4, 3)
+    y = [1, 2, 2, 2]
+    DeepForest.precompute!(n, x, y)
+    @test n.best.first != 1 || n.best.second != 1
 end

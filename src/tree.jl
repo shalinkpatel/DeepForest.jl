@@ -6,18 +6,18 @@ mutable struct Leaf <: TreeNode
     pred :: Int
 end
 
-Leaf() = Leaf(0)
+Leaf() = Leaf(1)
 
 loss(l :: Leaf, x :: Array{Float64, 2}, y :: Vector{Int}) = 0
 
 function precompute!(l :: Leaf, x :: Array{Float64, 2}, y :: Vector{Int})
-    if size(x, 2) != 0
+    if size(x, 1) != 0
         l.pred = mode(y)
     end
 end
 
 function predict(l :: Leaf, x :: Array{Float64, 2})
-    fill(l.pred, size(x, 2))
+    fill(l.pred, size(x, 1))
 end
 
 # Nodes
@@ -63,6 +63,24 @@ end
 
 function precompute!(n :: Node, x :: Array{Float64, 2}, y :: Vector{Int})
     if size(x, 2) != 0
-        
+        decision = n.splitter(x[:, n.subset]')'
+        n.left_split = decision[:, 1] .>= 0.5
+        n.right_split = decision[:, 2] .> 0.5
+
+        if length(y[n.left_split]) == 0
+            left_best = 0
+        else
+            left_best = mode(y[n.left_split])
+        end
+
+        if length(y[n.right_split]) == 0
+            right_best = 0
+        else
+            right_best = mode(y[n.right_split])
+        end
+
+        n.best = Pair{Int, Int}(left_best, right_best)
+        precompute!(n.left, x[n.left_split, :], y[n.left_split])
+        precompute!(n.right, x[n.right_split, :], y[n.right_split])
     end
 end
