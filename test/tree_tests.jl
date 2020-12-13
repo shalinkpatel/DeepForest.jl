@@ -79,3 +79,21 @@ end
     @test length(predict(n, x)) == 4
     @test length(unique(predict(n, x))) <= 2
 end
+
+@testset "Node loss" begin
+    feat_sub = Dict(
+        1 => [1, 2],
+        2 => [2, 3],
+        3 => [1, 3]
+    )
+
+    n = Node(feat_sub, 5, 2, 1)
+    x = rand(4, 3)
+    y = [1, 2, 2, 2]
+    DeepForest.precompute!(n, x, y)
+
+    @test loss!(n, x, y) != 0
+
+    gs = gradient(() -> loss!(n, x, y), DeepForest.tree_params(n))
+    @test gs != IdDict()
+end

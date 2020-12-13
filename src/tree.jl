@@ -8,7 +8,7 @@ end
 
 Leaf() = Leaf(1)
 
-loss(l :: Leaf, x :: Array{Float64, 2}, y :: Vector{Int}) = 0
+loss!(l :: Leaf, x :: Array{Float64, 2}, y :: Vector{Int}) = 0
 
 function precompute!(l :: Leaf, x :: Array{Float64, 2}, y :: Vector{Int})
     if size(x, 1) != 0
@@ -52,7 +52,7 @@ function Node(feat_sub :: Dict{Int, Vector{Int}}, hidden :: Int, depth :: Int, i
         right = Leaf()
     end
 
-    Node(splitter, feat_sub[id], Pair(0, 0), depth, 0.0, BitVector(), BitVector(), left, right)
+    Node(splitter, feat_sub[id], Pair(1, 1), depth, 0.0, BitVector(), BitVector(), left, right)
 end
 
 function tree_params(n :: Node)
@@ -68,13 +68,13 @@ function precompute!(n :: Node, x :: Array{Float64, 2}, y :: Vector{Int})
         n.right_split = decision[:, 2] .> 0.5
 
         if length(y[n.left_split]) == 0
-            left_best = 0
+            left_best = 1
         else
             left_best = mode(y[n.left_split])
         end
 
         if length(y[n.right_split]) == 0
-            right_best = 0
+            right_best = 1
         else
             right_best = mode(y[n.right_split])
         end
@@ -97,4 +97,33 @@ function predict(n :: Node, x :: Array{Float64, 2})
     preds[n.right_split] = predict(n.right, right_data)
 
     return preds
+end
+
+function loss!(n :: Node, x :: Array{Float64, 2}, y :: Vector{Int})
+    loss = 0
+    if size(x, 1) != 0
+        decision = n.splitter(x[:, n.subset]')'
+        left = decision[:, 1]
+        right = decision[:, 2]
+        
+        onehot = (y₀) -> Flux.onehot(y₀, 1:reduce(max, y))
+        ȳ = Float64.(reduce(hcat, onehot.(y)))
+
+        left_weight = left' .* ȳ
+        right_weight = right' .* ȳ
+
+        left_best = reduce(hcat, onehot.(fill(n.best.first, length(y))))
+        right_best = reduce(hcat, onehot.(fill(n.best.second, length(y))))
+
+        n.impurity += Flux.crossentropy(left_weight, left_best)
+        n.impurity += Flux.crossentropy(right_weight, right_best)
+
+        loss += n.impurity
+        loss += loss!(n.left, x, y)
+        loss += loss!(n.right, x, y)
+
+        return loss
+    else
+        return loss
+    end
 end
