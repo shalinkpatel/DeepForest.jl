@@ -84,3 +84,17 @@ function precompute!(n :: Node, x :: Array{Float64, 2}, y :: Vector{Int})
         precompute!(n.right, x[n.right_split, :], y[n.right_split])
     end
 end
+
+function predict(n :: Node, x :: Array{Float64, 2})
+    decision = n.splitter(x[:, n.subset]')'
+    n.left_split = decision[:, 1] .>= 0.5
+    n.right_split = decision[:, 2] .> 0.5
+    left_data = x[n.left_split, :]
+    right_data = x[n.right_split, :]
+
+    preds = Int.(zeros(size(x, 1)))
+    preds[n.left_split] = predict(n.left, left_data)
+    preds[n.right_split] = predict(n.right, right_data)
+
+    return preds
+end
