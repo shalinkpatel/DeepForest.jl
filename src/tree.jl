@@ -11,13 +11,13 @@ Leaf() = Leaf(0)
 loss(l :: Leaf, x :: Array{Float64, 2}, y :: Vector{Int}) = 0
 
 function precompute!(l :: Leaf, x :: Array{Float64, 2}, y :: Vector{Int})
-    if size(x, 1) != 0
+    if size(x, 2) != 0
         l.pred = mode(y)
     end
 end
 
 function predict(l :: Leaf, x :: Array{Float64, 2})
-    fill(l.pred, size(x, 1))
+    fill(l.pred, size(x, 2))
 end
 
 # Nodes
@@ -38,7 +38,8 @@ function Node(feat_sub :: Dict{Int, Vector{Int}}, hidden :: Int, depth :: Int, i
     splitter = Chain(
         Dense(length(feat_sub[id]), hidden, leakyrelu),
         Dense(hidden, hidden, leakyrelu),
-        Dense(hidden, 2, softmax)
+        Dense(hidden, 2),
+        softmax
     )
 
     if depth != 1
@@ -58,4 +59,10 @@ function tree_params(n :: Node)
     get_splitter(l :: Leaf) = []
     get_splitter(n :: Node) = [n.splitter, get_splitter(n.left)..., get_splitter(n.right)...]
     Flux.params(get_splitter(n)...)
+end
+
+function precompute!(n :: Node, x :: Array{Float64, 2}, y :: Vector{Int})
+    if size(x, 2) != 0
+        
+    end
 end

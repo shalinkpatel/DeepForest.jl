@@ -1,4 +1,4 @@
-using DeepForest
+using DeepForest, Flux
 using Test
 
 @testset "Leaf precompute" begin
