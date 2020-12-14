@@ -51,11 +51,11 @@ end
     model = Forest(25, 2, 10, 2, 1.0)
 
     forest_train!(500, model, x, y)
-    @test mean(predict(model, x) .== y) > .8
+    @test mean(predict(model, x) .== y) > .9
 end
 
 @testset "Forest importance" begin
-x = rand(Float32, 2, 1000);
+    x = rand(Float32, 2, 1000);
     x[1, :] .*= 2*π;
     x[1, :] .-= π;
     x[2, :] .*= 3;

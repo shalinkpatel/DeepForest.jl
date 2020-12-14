@@ -8,7 +8,7 @@ x[2, :] .*= 3;
 x[2, :] .-= 1.5;
 y = Int64.(x[2, :] .< sin.(x[1, :])) .+ 1;
 
-model = Forest(25, 2, 10, 2, 1.0)
+model = Forest(25, 2, 10, 2, 1.0, 1)
 
 forest_train!(1250, model, x, y)
 
