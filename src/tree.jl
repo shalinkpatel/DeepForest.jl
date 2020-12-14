@@ -156,13 +156,13 @@ end
 
 function importance(n :: Node, x :: Array{Float32, 2})
     scores = splitter_importance(n, x)
+    for (k, v) ∈ scores
+        scores[k] = v * 1/(n.impurity + 0.000001)
+    end
+
     if n.depth > 1
         left_scores = importance(n.left, x[:, n.left_split])
         right_scores = importance(n.right, x[:, n.right_split])
-
-        for (k, v) ∈ scores
-            scores[k] = v * 1/(n.impurity + 0.000001)
-        end
 
         for d ∈ [left_scores, right_scores]
             for (k, v) ∈ d
@@ -178,15 +178,16 @@ function importance(n :: Node, x :: Array{Float32, 2})
 end
 
 function plot_importance(imp :: Dict{Int, Float32}, y :: Vector{Int})
-    bar(string.(1:length(unique(y))), [imp[x] for x ∈ 1:length(unique(y))], legend=:false, color=1:length(unique(y)))
+    bar(string.(1:length(unique(y))), [imp[x] for x ∈ 1:length(unique(y))], legend=:false, color=1:length(unique(y)),
+        title="Relative Feature Importance", xlabel="Feature", ylabel="Importance")
 end
 
 function tree_train!(epochs :: Int, n :: Node, x :: Array{Float32, 2}, y :: Vector{Int})
     ps = params(n)
     opt = ADAM()
 
-    pbar = ProgressBar(1:epochs)
-    for epoch ∈ pbar
+    pbar = Progress(epochs)
+    for epoch ∈ 1:epochs
         local training_loss
 
         DeepForest.precompute!(n, x, y)
@@ -194,7 +195,7 @@ function tree_train!(epochs :: Int, n :: Node, x :: Array{Float32, 2}, y :: Vect
             training_loss = loss!(n, x, y)
             return training_loss
         end
-        set_description(pbar, string(@sprintf("Loss: %.4f || Acc: %.4f || ", training_loss, mean(predict(n, x) .== y))))
+        next!(pbar; showvalues = [(:loss, training_loss), (:acc, mean(predict(n, x) .== y))])
         Flux.update!(opt, ps, gs)
     end
 end
