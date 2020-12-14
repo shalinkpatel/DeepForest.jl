@@ -1,7 +1,4 @@
-using DeepForest
-using Test
+using SafeTestsets
 
-@testset "DeepForest.jl" begin
-    @test DeepForest.f(2) == 4
-    @test DeepForest.f(3) == 6
-end
+@safetestset "Tree Tests" begin include("tree_tests.jl") end
+@safetestset "Forest Tests" begin include("forest_tests.jl") end
