@@ -18,8 +18,11 @@ ShapML = "8523bd24-6f66-414b-9e1e-b02db3916d64"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
+BenchmarkTools = "0.5"
+DataFrames = "0.22"
 Flux = "0.11"
 Plots = "1.9"
+ProgressMeter = "1.4"
 Revise = "3.1"
 SafeTestsets = "0.0.1"
 ShapML = "0.3"
