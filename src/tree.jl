@@ -66,7 +66,7 @@ function precompute!(n :: Node, x :: Array{Float32, 2}, y :: Vector{Int})
     if size(x, 2) != 0
         decision = n.splitter(x[n.subset, :])
         n.left_split = decision[1, :] .>= 0.5
-        n.right_split = decision[2, :] .> 0.5
+        n.right_split = decision[1, :] .< 0.5
 
         if length(y[n.left_split]) == 0
             left_best = 1
@@ -88,14 +88,14 @@ end
 
 function predict(n :: Node, x :: Array{Float32, 2})
     decision = n.splitter(x[n.subset, :])
-    n.left_split = decision[1, :] .>= 0.5
-    n.right_split = decision[2, :] .> 0.5
-    left_data = x[:, n.left_split]
-    right_data = x[:, n.right_split]
+    left_split = decision[1, :] .>= 0.5
+    right_split = decision[1, :] .< 0.5
+    left_data = x[:, left_split]
+    right_data = x[:, right_split]
 
     preds = Int.(zeros(size(x, 2)))
-    preds[n.left_split] = predict(n.left, left_data)
-    preds[n.right_split] = predict(n.right, right_data)
+    preds[left_split] = predict(n.left, left_data)
+    preds[right_split] = predict(n.right, right_data)
 
     return preds
 end
@@ -127,6 +127,58 @@ function loss!(n :: Node, x :: Array{Float32, 2}, y :: Vector{Int})
     else
         return loss
     end
+end
+
+function splitter_importance(n :: Node, x :: Array{Float32, 2})
+    feats_sub = x[n.subset, :]
+    val = min(200, size(feats_sub, 2))
+    function predict_wrapper(n :: Node, data :: DataFrame)
+        pred = DataFrame(y_pred = predict(n, Float32.(Array(data)')))
+    end
+
+    data_shap = ShapML.shap(explain = DataFrame(feats_sub[n.subset, 1:val]'),
+        reference = DataFrame(feats_sub[n.subset, end-val+1:end]'),
+        model = n,
+        predict_function = predict_wrapper,
+        sample_size = 150,
+        parallel = :both,
+    )
+
+    s̄ = DataFrames.by(data_shap, [:feature_name], 
+        mean_effect = [:shap_effect] => x -> mean(abs.(x.shap_effect)))
+
+    imp = Dict{Int, Float32}()
+    for i ∈ 1:length(n.subset)
+        @inbounds imp[n.subset[i]] = s̄.mean_effect[i]
+    end
+    return imp
+end
+
+function importance(n :: Node, x :: Array{Float32, 2})
+    scores = splitter_importance(n, x)
+    if n.depth > 1
+        left_scores = importance(n.left, x[:, n.left_split])
+        right_scores = importance(n.right, x[:, n.right_split])
+
+        for (k, v) ∈ scores
+            scores[k] = v * 1/(n.impurity + 0.000001)
+        end
+
+        for d ∈ [left_scores, right_scores]
+            for (k, v) ∈ d
+                if k ∈ keys(scores)
+                    scores[k] += v
+                else
+                    scores[k] = v
+                end
+            end
+        end
+    end
+    return scores
+end
+
+function plot_importance(imp :: Dict{Int, Float32}, y :: Vector{Int})
+    bar(string.(1:length(unique(y))), [imp[x] for x ∈ 1:length(unique(y))], legend=:false, color=1:length(unique(y)))
 end
 
 function tree_train!(epochs :: Int, n :: Node, x :: Array{Float32, 2}, y :: Vector{Int})

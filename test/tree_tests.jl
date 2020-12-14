@@ -123,3 +123,28 @@ end
     tree_train!(1000, model, x, y)
     @test mean(predict(model, x) .== y) > .9
 end
+
+@testset "Node importances" begin
+    x = rand(Float32, 2, 1000);
+    x[1, :] .*= 2*π;
+    x[1, :] .-= π;
+    x[2, :] .*= 3;
+    x[2, :] .-= 1.5;
+    y = Int64.(x[2, :] .< sin.(x[1, :])) .+ 1;
+
+    features = Dict(
+        7 => [1, 2],
+        6 => [1, 2],
+        5 => [1, 2],
+        4 => [1, 2],
+        3 => [1, 2],
+        2 => [1, 2],
+        1 => [1, 2]
+    )
+
+    model = Node(features, 10, 2, 1)
+
+    tree_train!(1000, model, x, y)
+    imp = importance(model, x)
+    @test imp[2] > imp[1]
+end

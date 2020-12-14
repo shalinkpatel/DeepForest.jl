@@ -25,3 +25,10 @@ tree_train!(1000, model, x, y)
 ŷ = DeepForest.predict(model, x)
 scatter(x[1, :], x[2, :], color=ŷ, legend=false)
 plot!((x) -> sin(x), xlims=(-π, π), color=:green, linewidth=5)
+
+imp = importance(model, x)
+ρ = sum(values(imp))
+for (k, v) ∈ imp
+    imp[k] = v / ρ
+end
+plot_importance(imp, y)
