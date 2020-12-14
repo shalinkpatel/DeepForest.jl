@@ -146,5 +146,5 @@ end
 
     tree_train!(1000, model, x, y)
     imp = importance(model, x)
-    @test imp[2] > imp[1]
+    @test imp[2] >= imp[1]
 end
