@@ -1,7 +1,7 @@
 name = "DeepForest"
 uuid = "caac18e2-70b9-41b7-b707-5295ac4b8fcd"
 authors = ["Shalin Patel <shalin.kp.patel@gmail.com> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
@@ -16,6 +16,7 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SafeTestsets = "1bc83da4-3b8d-516f-aca4-4fe02f6d838f"
 ShapML = "8523bd24-6f66-414b-9e1e-b02db3916d64"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [compat]
 BenchmarkTools = "0.5"
