@@ -28,6 +28,7 @@ Revise = "3.1"
 SafeTestsets = "0.0.1"
 ShapML = "0.3"
 StatsBase = "0.33"
+Weave = "0.10"
 julia = "1"
 
 [extras]
