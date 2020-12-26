@@ -50,7 +50,7 @@ end
 
     model = Forest(25, 2, 10, 2, 1.0)
 
-    forest_train!(500, model, x, y)
+    forest_train!(1000, model, x, y)
     @test mean(predict(model, x) .== y) > .9
 end
 
@@ -64,7 +64,7 @@ end
 
     model = Forest(25, 2, 10, 2, 1.0)
 
-    forest_train!(500, model, x, y)
+    forest_train!(1000, model, x, y)
     imp = importance(model, x)
     @test imp[2] > 0
     @test imp[1] > 0
