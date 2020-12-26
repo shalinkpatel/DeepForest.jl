@@ -116,7 +116,7 @@ function forest_train!(epochs :: Int, F :: Forest, x :: Array{Float32, 2}, y :: 
     Threads.@threads for i ∈ 1:F.T
         FS = slices[i]
         ps = params(FS)
-        opt = ADAM(0.05)
+        opt = ADAM(0.00025)
 
         for epoch ∈ 1:epochs
             local training_loss

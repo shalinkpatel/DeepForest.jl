@@ -154,26 +154,30 @@ function splitter_importance(n :: Node, x :: Array{Float32, 2})
 end
 
 function importance(n :: Node, x :: Array{Float32, 2})
-    scores = splitter_importance(n, x)
-    for (k, v) ∈ scores
-        scores[k] = v * 1/(n.impurity + 0.000001)
-    end
+    try
+        scores = splitter_importance(n, x)
+        for (k, v) ∈ scores
+            scores[k] = v * 1/(n.impurity + 0.000001)
+        end
 
-    if n.depth > 1
-        left_scores = importance(n.left, x[:, n.left_split])
-        right_scores = importance(n.right, x[:, n.right_split])
+        if n.depth > 1
+            left_scores = importance(n.left, x[:, n.left_split])
+            right_scores = importance(n.right, x[:, n.right_split])
 
-        for d ∈ [left_scores, right_scores]
-            for (k, v) ∈ d
-                if k ∈ keys(scores)
-                    scores[k] += v
-                else
-                    scores[k] = v
+            for d ∈ [left_scores, right_scores]
+                for (k, v) ∈ d
+                    if k ∈ keys(scores)
+                        scores[k] += v
+                    else
+                        scores[k] = v
+                    end
                 end
             end
         end
+        return scores
+    catch e
+        return Dict()
     end
-    return scores
 end
 
 function plot_importance(imp :: Dict{Int, Float32}, x :: Array{Float32, 2})
@@ -183,7 +187,7 @@ end
 
 function tree_train!(epochs :: Int, n :: Node, x :: Array{Float32, 2}, y :: Vector{Int})
     ps = params(n)
-    opt = ADAM(0.05)
+    opt = ADAM(0.00025)
 
     pbar = Progress(epochs)
     for epoch ∈ 1:epochs
