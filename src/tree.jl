@@ -38,8 +38,8 @@ Flux.@functor Node
 
 function Node(feat_sub :: Dict{Int, Vector{Int}}, hidden :: Int, depth :: Int, id :: Int)
     splitter = Chain(
-        Dense(length(feat_sub[id]), hidden, leakyrelu),
-        Dense(hidden, hidden, leakyrelu),
+        Dense(length(feat_sub[id]), hidden, tanh),
+        Dense(hidden, hidden, tanh),
         Dense(hidden, 2),
         softmax
     )
@@ -130,14 +130,13 @@ function loss!(n :: Node, x :: Array{Float32, 2}, y :: Vector{Int})
 end
 
 function splitter_importance(n :: Node, x :: Array{Float32, 2})
-    feats_sub = x[n.subset, :]
-    val = min(200, size(feats_sub, 2))
+    val = min(200, size(x, 2))
     function predict_wrapper(n :: Node, data :: DataFrame)
         pred = DataFrame(y_pred = predict(n, Float32.(Array(data)')))
     end
 
-    data_shap = ShapML.shap(explain = DataFrame(feats_sub[n.subset, 1:val]'),
-        reference = DataFrame(feats_sub[n.subset, end-val+1:end]'),
+    data_shap = ShapML.shap(explain = DataFrame(x[:, 1:val]'),
+        reference = DataFrame(x[:, end-val+1:end]'),
         model = n,
         predict_function = predict_wrapper,
         sample_size = 150,
@@ -177,14 +176,14 @@ function importance(n :: Node, x :: Array{Float32, 2})
     return scores
 end
 
-function plot_importance(imp :: Dict{Int, Float32}, y :: Vector{Int})
-    bar(string.(1:length(unique(y))), [imp[x] for x ∈ 1:length(unique(y))], legend=:false, color=1:length(unique(y)),
+function plot_importance(imp :: Dict{Int, Float32}, x :: Array{Float32, 2})
+    bar(string.(1:size(x, 1)), [imp[x] for x ∈ 1:size(x, 1)], legend=:false, color=1:size(x, 1),
         title="Relative Feature Importance", xlabel="Feature", ylabel="Importance")
 end
 
 function tree_train!(epochs :: Int, n :: Node, x :: Array{Float32, 2}, y :: Vector{Int})
     ps = params(n)
-    opt = ADAM()
+    opt = ADAM(0.05)
 
     pbar = Progress(epochs)
     for epoch ∈ 1:epochs

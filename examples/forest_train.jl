@@ -10,11 +10,11 @@ y = Int64.(x[2, :] .< sin.(x[1, :])) .+ 1;
 
 model = Forest(25, 2, 10, 2, 1.0)
 
-forest_train!(2500, model, x, y)
+forest_train!(1000, model, x, y)
 
 ŷ = predict(model, x)
 scatter(x[1, :], x[2, :], color=ŷ, legend=false)
 plot!((x) -> sin(x), xlims=(-π, π), color=:green, linewidth=5)
 
 imp = importance(model, x)
-plot_importance(imp, y)
+plot_importance(imp, x)

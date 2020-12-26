@@ -31,4 +31,4 @@ imp = importance(model, x)
 for (k, v) ∈ imp
     imp[k] = v / ρ
 end
-plot_importance(imp, y)
+plot_importance(imp, x)

@@ -20,7 +20,7 @@ model = Forest(25, 2, 10, 2, 1.0)
 Now we train
 
 ```julia
-forest_train!(2500, model, x, y)
+forest_train!(1000, model, x, y)
 ```
 
 Observe the results.
@@ -36,5 +36,5 @@ We can also compute importances.
 
 ```julia
 imp = importance(model, x)
-plot_importance(imp, y)
+plot_importance(imp, x)
 ```
