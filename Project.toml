@@ -22,7 +22,7 @@ Weave = "44d3d7a6-8a23-5bf8-98c5-b353f8df5ec9"
 
 [compat]
 BenchmarkTools = "0.5"
-DataFrames = "0.20, 0.23"
+DataFrames = "0.20, 0.23, 0.22"
 Flux = "0.11"
 Plots = "1.9"
 ProgressMeter = "1.4"
