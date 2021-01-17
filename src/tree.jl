@@ -187,7 +187,7 @@ end
 
 function tree_train!(epochs :: Int, n :: Node, x :: Array{Float32, 2}, y :: Vector{Int})
     ps = params(n)
-    opt = ADAM(0.00025)
+    opt = NADAM(0.00025)
 
     pbar = Progress(epochs)
     for epoch ∈ 1:epochs
